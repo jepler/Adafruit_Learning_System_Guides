@@ -153,7 +153,7 @@ def sample(population, k):
 # if necessary
 displayio.release_displays()
 bus = board.SPI()
-framebuffer = sharpdisplay.SharpMemoryFramebuffer(bus, board.D6, 400, 240)
+framebuffer = sharpdisplay.SharpMemoryFramebuffer(bus, board.D2, 400, 240)
 display = framebufferio.FramebufferDisplay(framebuffer, auto_refresh = True)
 
 # Load our font
@@ -175,22 +175,21 @@ for line in range(3):
 # Get something on the display as soon as possible by loading
 # specific glyphs.
 font.load_glyphs(b"BLACK")
-blm_font[0].text = "BLACK"
-font.load_glyphs(b"ISEV")
-blm_font[1].text = "LIVES"
-font.load_glyphs(b"RMT")
-blm_font[2].text = "MATTER"
+with BatchDisplayUpdate(display):
+    blm_font[0].text = "BLACK"
+font.load_glyphs(b"IVES")
+with BatchDisplayUpdate(display):
+    blm_font[1].text = "LIVES"
+font.load_glyphs(b"MTR")
+with BatchDisplayUpdate(display):
+    blm_font[2].text = "MATTER"
 font.load_glyphs(b"' DFGHJNOPQUWXYZabcdefghijklmnopqrstuvwxyz")
 
 
 # Create a 2 line set of font text for names
 names_font = [None, None]
 for line in range(2):
-    label = adafruit_display_text.label.Label(
-        font,
-        color=0xFFFFFF,
-        max_glyphs=16,
-    )
+    label = adafruit_display_text.label.Label(font, color=0xFFFFFF, max_glyphs=16)
     # Center each line horizontally, position vertically
     label.anchor_point = (0.5, 0)
     label.anchored_position = (200, line*84+42)
@@ -231,15 +230,16 @@ while True:
         print(name)
         lines = name.split(" ")
         with BatchDisplayUpdate(display):
-            for i in range(2):
-                names_font[i].text = lines[i]
+            names_font[0].text = lines[0]
+            names_font[1].text = lines[1]
 
-                # Due to a bug in adafruit_display_text, we need to reestablish
-                # the position of the labels when updating them.
-                # Once https://github.com/adafruit/Adafruit_CircuitPython_Display_Text/issues/82
-                # has been resolved, this code will no longer be necessary (but
-                # will not be harmful either)
-                names_font[i].anchor_point = (0.5, 0)
-                names_font[i].anchored_position = (200, i*84+42)
+            # Due to a bug in adafruit_display_text, we need to reestablish
+            # the position of the labels when updating them.
+            # Once https://github.com/adafruit/Adafruit_CircuitPython_Display_Text/issues/82
+            # has been resolved, this code will no longer be necessary (but
+            # will not be harmful either)
+            names_font[0].anchor_point = (0.5, 0)
+            names_font[0].anchored_position = (200, 0*84+42)
+            names_font[1].anchor_point = (0.5, 0)
+            names_font[1].anchored_position = (200, 1*84+42)
         time.sleep(5)
-    names_font[0].text = names_font[1].text = ""
